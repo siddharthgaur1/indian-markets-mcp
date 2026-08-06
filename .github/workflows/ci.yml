@@ -1,7 +1,7 @@
 name: ci
-on:
-  push: { branches: [main] }
-  pull_request:
+# No branch filter: this repo's default branch is `master`, and an earlier
+# version pinned `branches: [main]`, so CI silently never ran.
+on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
