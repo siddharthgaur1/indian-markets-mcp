@@ -1,5 +1,9 @@
 # indian-markets-mcp
 
+[![Portfolio](https://img.shields.io/badge/↩-siddharthgaur1-111827?style=flat-square)](https://github.com/siddharthgaur1)
+[![ci](https://github.com/siddharthgaur1/indian-markets-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/siddharthgaur1/indian-markets-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An MCP server exposing Indian market and regulatory data from **official, openly
 published sources** — NSE's bhavcopy archive, NIFTY Indices constituent files,
 AMFI's industry NAV file, and a local SEBI enforcement-order corpus.
