@@ -23,9 +23,12 @@ import csv
 import io
 import zipfile
 from dataclasses import asdict, dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from indian_markets_mcp.http import Http, UpstreamError, shared
+
+_IST = ZoneInfo("Asia/Kolkata")
 
 BHAVCOPY_URL = (
     "https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_{yyyymmdd}_F_0000.csv.zip"
@@ -133,7 +136,9 @@ def is_trading_day(day: date, http: Http | None = None) -> bool:
 
 def latest_day(http: Http | None = None, max_lookback: int = 10) -> tuple[date, list[Bar]]:
     """Walk back from today to the most recent day with a published bhavcopy."""
-    today = date.today()
+    # NSE trading days are defined in IST; a server running in UTC (e.g. CI)
+    # would otherwise be a day behind for ~5.5 hours every evening IST.
+    today = datetime.now(_IST).date()
     for offset in range(max_lookback):
         day = today - timedelta(days=offset)
         if day.weekday() >= 5:  # cheap skip; the archive is authoritative for holidays

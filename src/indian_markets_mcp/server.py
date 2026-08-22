@@ -31,7 +31,7 @@ def _parse_day(value: str | None, label: str) -> date | None:
     if not value:
         return None
     try:
-        return datetime.strptime(value.strip(), "%Y-%m-%d").date()
+        return datetime.strptime(value.strip(), "%Y-%m-%d").date()  # noqa: DTZ007 — calendar date, not an instant; tz-aware would be meaningless
     except ValueError:
         raise ValueError(f"{label} must be an ISO date like 2026-08-05, got {value!r}") from None
 

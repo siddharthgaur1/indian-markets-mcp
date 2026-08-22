@@ -72,7 +72,7 @@ def _parse_date(raw: str) -> str | None:
     if not value:
         return None
     try:
-        return datetime.strptime(value, "%d-%b-%Y").date().isoformat()
+        return datetime.strptime(value, "%d-%b-%Y").date().isoformat()  # noqa: DTZ007 — calendar date, not an instant; tz-aware would be meaningless
     except ValueError:
         return None
 
@@ -188,7 +188,7 @@ def nav_history(
     series = []
     for row in payload["data"]:
         try:
-            day = datetime.strptime(row["date"], "%d-%m-%Y").date()
+            day = datetime.strptime(row["date"], "%d-%m-%Y").date()  # noqa: DTZ007 — calendar date, not an instant; tz-aware would be meaningless
         except (KeyError, ValueError):
             continue
         if start and day < start:
