@@ -18,7 +18,14 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Topic :: Office/Business :: Financial",
 ]
-dependencies = ["mcp>=2.0.0", "httpx>=0.27"]
+dependencies = [
+  "mcp>=2.0.0",
+  "httpx>=0.27",
+  # zoneinfo has no system tz database to fall back on for Asia/Kolkata on
+  # Windows (and minimal Linux images without tzdata installed); the marker
+  # keeps this a no-op on systems that already have one.
+  "tzdata>=2024.1; sys_platform == 'win32'",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-cov", "ruff"]

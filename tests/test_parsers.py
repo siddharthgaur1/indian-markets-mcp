@@ -67,6 +67,31 @@ def test_nav_parser_ignores_the_header_row():
     assert all(s.scheme_code != 0 for s in amfi.parse_nav_all(NAV_SAMPLE))
 
 
+NAV_SAMPLE_WITH_PLAN_OPTION = """Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Plan;Option;Net Asset Value;Date
+
+Open Ended Schemes(Debt Scheme - Banking and PSU Fund)
+
+Aditya Birla Sun Life Mutual Fund
+
+119551;INF209KA12Z1;INF209KA13Z9;Aditya Birla Sun Life Banking & PSU Debt Fund;Direct Plan;IDCW-Re-investment;106.9419;25-Aug-2026
+119552;INF209K01YM2;-;Aditya Birla Sun Life Banking & PSU Debt Fund;Direct Plan;MONTHLY DCW Payout;117.2463;25-Aug-2026
+"""
+
+
+def test_nav_parser_handles_the_plan_option_columns_amfi_added_after_2026_08_06():
+    """AMFI inserted Plan/Option between Scheme Name and NAV at some point after
+    the 2026-08-06 format this module's docstring was originally pinned to.
+    Regression test for that: a real live run hit `len(schemes) == 0` because
+    the row-shape check only accepted the old 6-field row."""
+    schemes = {s.scheme_code: s for s in amfi.parse_nav_all(NAV_SAMPLE_WITH_PLAN_OPTION)}
+    assert len(schemes) == 2
+    absl = schemes[119551]
+    assert absl.plan == "Direct Plan"
+    assert absl.option == "IDCW-Re-investment"
+    assert absl.nav == pytest.approx(106.9419)
+    assert absl.nav_date == "2026-08-25"
+
+
 BHAV_HEADER = (
     "TradDt,BizDt,Sgmt,Src,FinInstrmTp,FinInstrmId,ISIN,TckrSymb,SctySrs,XpryDt,"
     "FininstrmActlXpryDt,StrkPric,OptnTp,FinInstrmNm,OpnPric,HghPric,LwPric,ClsPric,"

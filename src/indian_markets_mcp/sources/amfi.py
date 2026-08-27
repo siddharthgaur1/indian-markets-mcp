@@ -7,19 +7,24 @@ text file AMFI puts up for exactly this purpose. ~14,000 schemes.
 Historical NAV comes from mfapi.in, a free community API that mirrors AMFI's
 own historical archive. See docs/SOURCES.md for the terms position on both.
 
-File layout (verified 2026-08-06), which the parser depends on:
+File layout (verified 2026-08-27), which the parser depends on:
 
-    Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+    Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Plan;Option;Net Asset Value;Date
     <blank>
     Open Ended Schemes(Debt Scheme - Banking and PSU Fund)   <- category
     <blank>
     Aditya Birla Sun Life Mutual Fund                        <- AMC
     <blank>
-    119551;INF209KA12Z1;INF209KA13Z9;...;107.0167;05-Aug-2026 <- scheme rows
+    119551;INF209KA12Z1;INF209KA13Z9;...;Direct Plan;IDCW-Re-investment;106.9419;25-Aug-2026 <- scheme rows
 
 Category and AMC headers are both bare lines. They are told apart by the
 "Schemes(" marker, which every one of the 90 category lines carries and no AMC
 name does.
+
+AMFI added the Plan/Option columns (6 fields -> 8) sometime between
+2026-08-06 and 2026-08-27, without any version marker or notice -- the row
+shape is the only signal. The parser accepts both the old 6-field and new
+8-field row so a historical snapshot in the old shape still parses.
 """
 
 from __future__ import annotations
@@ -47,6 +52,8 @@ class Scheme:
     isin_reinvestment: str | None
     nav: float | None
     nav_date: str | None
+    plan: str | None = None
+    option: str | None = None
 
 
 def _clean_isin(raw: str) -> str | None:
@@ -86,8 +93,14 @@ def parse_nav_all(text: str) -> list[Scheme]:
         stripped = line.strip()
         if not stripped:
             continue
-        if stripped.count(";") == 5:
-            code, isin_g, isin_r, name, nav, nav_date = (p.strip() for p in stripped.split(";"))
+        semicolons = stripped.count(";")
+        if semicolons in (5, 7):
+            fields = [p.strip() for p in stripped.split(";")]
+            if semicolons == 7:
+                code, isin_g, isin_r, name, plan, option, nav, nav_date = fields
+            else:
+                code, isin_g, isin_r, name, nav, nav_date = fields
+                plan = option = None
             if not code.isdigit():  # the header row
                 continue
             schemes.append(
@@ -100,6 +113,8 @@ def parse_nav_all(text: str) -> list[Scheme]:
                     isin_reinvestment=_clean_isin(isin_r),
                     nav=_parse_nav(nav),
                     nav_date=_parse_date(nav_date),
+                    plan=plan or None,
+                    option=option or None,
                 )
             )
         elif _CATEGORY_MARKER.search(stripped):
