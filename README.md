@@ -10,6 +10,10 @@ AMFI's industry NAV file, and a local SEBI enforcement-order corpus.
 
 Built against **MCP Python SDK v2** (`mcp >= 2.0.0`).
 
+![The eight tools the server advertises over tools/list](docs/tools.svg)
+
+*The server's real `tools/list` response, fetched in-process with the MCP SDK client (no upstream calls). Regenerate: `python scripts/render_tool_list.py`.*
+
 ## Why this one exists
 
 There are already several Indian-market MCP servers (see
